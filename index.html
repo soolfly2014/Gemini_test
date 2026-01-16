@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日语刷题 - 柴犬寿司店 (豪华音效版)</title>
+    <title>日语刷题 - 柴犬寿司店 (纯净版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +19,7 @@
             background-size: 40px 40px;
             background-position: 0 0, 20px 20px;
             user-select: none;
-            padding-bottom: 120px; /* 留出底部空间 */
+            padding-bottom: 50px;
         }
 
         /* 按钮点击反馈优化 */
@@ -48,6 +48,10 @@
         .mascot-float { animation: float 3s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         
+        /* 点击小狗时的抖动动画 */
+        .mascot-shake { animation: shake 0.3s ease-in-out; }
+        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(10deg); } 50% { transform: rotate(0deg); } 75% { transform: rotate(-10deg); } 100% { transform: rotate(0deg); } }
+
         .hidden-screen { display: none !important; }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -63,97 +67,9 @@
             background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #EFEBE9 10px, #EFEBE9 20px);
             box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
         }
-        
-        /* --- 音乐播放器样式 --- */
-        .music-player-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
-        }
-
-        /* 本地播放器模式 */
-        .local-player {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 3px solid #FFAB40;
-            border-radius: 50px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 8px 20px rgba(255, 171, 64, 0.3);
-            transition: all 0.3s;
-        }
-        
-        /* Bilibili 播放器容器 */
-        .bili-player {
-            width: 300px;
-            height: 180px;
-            background: black;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 4px solid #FB7299; /* B站粉 */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: none; /* 默认隐藏 */
-        }
-        .bili-player.active { display: block; }
-        
-        .mode-switch-btn {
-            background: #333;
-            color: white;
-            font-size: 10px;
-            padding: 4px 8px;
-            border-radius: 10px;
-            cursor: pointer;
-            border: 1px solid white;
-            opacity: 0.8;
-        }
-        .mode-switch-btn:hover { opacity: 1; }
-
-        .disc-icon { font-size: 24px; transition: transform 1s linear; }
-        .playing-anim { animation: spin 3s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
     </style>
 </head>
 <body class="flex flex-col items-center min-h-screen py-6 px-4 text-gray-800">
-
-    <!-- 音乐播放器组件 -->
-    <div class="music-player-container">
-        <!-- 模式切换开关 -->
-        <button onclick="switchMusicMode()" class="mode-switch-btn" id="mode-btn">
-            🔄 切换到 Bilibili 原声
-        </button>
-
-        <!-- 模式A: 内置轻音乐播放器 -->
-        <div id="player-local" class="local-player">
-            <div id="music-disc" class="disc-icon" onclick="toggleLocalMusic()">💿</div>
-            <div class="flex flex-col min-w-[120px]">
-                <div class="overflow-hidden w-full whitespace-nowrap">
-                    <span id="music-title" class="text-xs font-bold text-gray-700 block">轻音乐模式</span>
-                </div>
-                <div class="flex items-center justify-between mt-1">
-                    <button onclick="changeTrack(-1)" class="text-orange-500 hover:text-orange-700 active:scale-90">⏮</button>
-                    <button onclick="toggleLocalMusic()" id="play-pause-btn" class="text-base text-orange-500 font-black hover:text-orange-700 active:scale-90 mx-2">▶</button>
-                    <button onclick="changeTrack(1)" class="text-orange-500 hover:text-orange-700 active:scale-90">⏭</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 模式B: Bilibili 嵌入播放器 -->
-        <div id="player-bili" class="bili-player">
-            <!-- 直接嵌入用户指定的 B站视频 -->
-            <iframe id="bili-iframe" src="" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="width: 100%; height: 100%;"></iframe>
-        </div>
-    </div>
-
-    <!-- 音频对象 (隐藏) -->
-    <audio id="bgm-audio" loop></audio>
 
     <!-- 弹窗 -->
     <div id="resume-modal" class="fixed inset-0 bg-black/50 z-50 hidden-screen flex items-center justify-center p-4">
@@ -171,7 +87,7 @@
     <!-- 吉祥物 -->
     <div class="mascot-float mb-2 text-center z-10 w-full max-w-md pointer-events-none">
         <div class="flex items-end justify-center">
-            <div class="text-7xl filter drop-shadow-xl cursor-pointer relative -mr-4 z-10 pointer-events-auto transition hover:scale-110 active:scale-90" onclick="pokeMascot()">
+            <div id="mascot-dog" class="text-7xl filter drop-shadow-xl cursor-pointer relative -mr-4 z-10 pointer-events-auto transition hover:scale-110 active:scale-90" onclick="pokeMascot()">
                 🐕
             </div>
             <div class="bg-white px-5 py-3 rounded-2xl rounded-bl-none border-4 border-orange-400 font-bold text-orange-800 shadow-lg relative max-w-[280px] text-sm pointer-events-auto">
@@ -184,7 +100,7 @@
     <div id="screen-home" class="w-full max-w-md fade-in mt-6 relative z-20">
         <div class="bg-white p-6 rounded-3xl shadow-xl border-4 border-orange-100 mb-6 text-center">
             <h1 class="text-3xl font-extrabold text-gray-700 mb-2">日语寿司店</h1>
-            <p class="text-gray-400 text-sm">点击按钮听听看新音效！🔊</p>
+            <p class="text-gray-400 text-sm">点一份寿司，学一句日语！</p>
         </div>
         
         <div class="space-y-3">
@@ -271,103 +187,22 @@
     </div>
 
     <script>
-        // ----------------- 🔊 音效系统 (核心升级) -----------------
+        // ----------------- 🔊 音效系统 -----------------
         const SFX = {
-            click: new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_736f990921.mp3?filename=bubble-pop-28367.mp3"), // 气泡声
-            correct: new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_12b0c7443c.mp3?filename=success-1-6297.mp3"), // 叮咚
-            wrong: new Audio("https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=wrong-answer-129254.mp3"), // 噗
-            win: new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c153e1.mp3?filename=success-fanfare-trumpets-6185.mp3"), // 胜利
-            bark: new Audio("https://cdn.pixabay.com/download/audio/2021/08/09/audio_2492167098.mp3?filename=dog-bark-17998.mp3") // 狗叫
+            click: new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_736f990921.mp3?filename=bubble-pop-28367.mp3"),
+            correct: new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_12b0c7443c.mp3?filename=success-1-6297.mp3"),
+            wrong: new Audio("https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=wrong-answer-129254.mp3"),
+            win: new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c153e1.mp3?filename=success-fanfare-trumpets-6185.mp3"),
+            bark: new Audio("https://github.com/soolfly2014/Gemini_test/edit/main/dog.mp3") 
         };
 
-        // 统一播放函数，处理音效并发
+        // 统一播放函数
         function playSound(type) {
             const sound = SFX[type];
             if(sound) {
-                sound.currentTime = 0; // 每次播放重置时间，实现连续快速点击
-                sound.volume = 0.6; // 音效不需要太大声
+                sound.currentTime = 0;
+                sound.volume = 0.6;
                 sound.play().catch(e => console.log('Wait for interaction'));
-            }
-        }
-
-        // ----------------- 🎵 音乐系统 (Bilibili 接入) -----------------
-        const BGM_LIST = [
-            { title: "Ghibli Vibe", url: "https://cdn.pixabay.com/download/audio/2022/03/09/audio_822ca8b454.mp3" },
-            { title: "City Pop Vibe", url: "https://cdn.pixabay.com/download/audio/2022/01/26/audio_d0c6ff1bcd.mp3" }
-        ];
-
-        // 您的 Bilibili 视频 ID
-        const BILI_BVID = "BV1Vw4m1S7jT"; 
-        let currentMode = 'local'; // 'local' or 'bili'
-
-        function switchMusicMode() {
-            playSound('click');
-            const localPlayer = document.getElementById('player-local');
-            const biliPlayer = document.getElementById('player-bili');
-            const modeBtn = document.getElementById('mode-btn');
-            const bgmAudio = document.getElementById('bgm-audio');
-            const biliIframe = document.getElementById('bili-iframe');
-
-            if (currentMode === 'local') {
-                // 切换到 B站
-                currentMode = 'bili';
-                bgmAudio.pause(); // 暂停本地
-                localPlayer.style.display = 'none';
-                biliPlayer.classList.add('active');
-                modeBtn.innerText = "🔄 切换回内置轻音乐";
-                // 加载 B站播放器 (不自动播放，需用户点击)
-                if (!biliIframe.src) {
-                    biliIframe.src = `//player.bilibili.com/player.html?bvid=${BILI_BVID}&page=1&high_quality=1&danmaku=0`;
-                }
-            } else {
-                // 切换回本地
-                currentMode = 'local';
-                biliPlayer.classList.remove('active');
-                localPlayer.style.display = 'flex';
-                modeBtn.innerText = "🔄 切换到 Bilibili 原声";
-                // 停止 B站播放 (简单粗暴重置 src)
-                const tempSrc = biliIframe.src;
-                biliIframe.src = ''; 
-                biliIframe.src = tempSrc;
-            }
-        }
-
-        // ----------------- 原有逻辑保持不变 -----------------
-        let currentTrackIdx = 0;
-        let isLocalPlaying = false;
-        
-        const bgmAudio = document.getElementById('bgm-audio');
-        bgmAudio.src = BGM_LIST[0].url;
-        bgmAudio.volume = 0.4;
-
-        function toggleLocalMusic() {
-            if (bgmAudio.paused) {
-                bgmAudio.play();
-                isLocalPlaying = true;
-            } else {
-                bgmAudio.pause();
-                isLocalPlaying = false;
-            }
-            updateLocalUI();
-        }
-
-        function changeTrack(d) {
-            currentTrackIdx = (currentTrackIdx + d + BGM_LIST.length) % BGM_LIST.length;
-            bgmAudio.src = BGM_LIST[currentTrackIdx].url;
-            if (isLocalPlaying) bgmAudio.play();
-            updateLocalUI();
-        }
-
-        function updateLocalUI() {
-            const btn = document.getElementById('play-pause-btn');
-            const disc = document.getElementById('music-disc');
-            document.getElementById('music-title').innerText = BGM_LIST[currentTrackIdx].title;
-            if (isLocalPlaying) {
-                btn.innerText = "⏸";
-                disc.classList.add('playing-anim');
-            } else {
-                btn.innerText = "▶";
-                disc.classList.remove('playing-anim');
             }
         }
 
@@ -395,7 +230,7 @@
             ]
         };
 
-        // ----------------- 游戏核心逻辑 (状态管理) -----------------
+        // ----------------- 游戏核心逻辑 -----------------
         let currentLevel = '';
         let quizQuestions = [];
         let currentIndex = 0;
@@ -491,14 +326,14 @@
             const reward = SUSHI_REWARDS[currentIndex];
             if (selectedIdx === correctIdx) {
                 score++;
-                playSound('correct'); // 播放正确音效
+                playSound('correct'); 
                 btnElement.classList.add('opt-correct', 'pop-in');
                 btnElement.classList.remove('opacity-80');
                 mascotDialog.innerText = `好棒！${reward.name} Get！😋`;
                 earnedSushiList[currentIndex] = reward;
                 updateSushiSlot(currentIndex, reward, true);
             } else {
-                playSound('wrong'); // 播放错误音效
+                playSound('wrong'); 
                 btnElement.classList.add('opt-wrong');
                 btnElement.classList.remove('opacity-80');
                 allBtns[correctIdx].classList.add('opt-correct');
@@ -529,7 +364,7 @@
         }
 
         function finishQuiz() {
-            playSound('win'); // 播放胜利音效
+            playSound('win'); 
             clearProgress(currentLevel);
             showScreen('screen-result');
             renderBentoBox();
@@ -602,9 +437,19 @@
             return newArr;
         }
         
+        // 点击小狗：播放两声短促的叫声，并添加抖动效果
         function pokeMascot() {
             playSound('bark');
+            setTimeout(() => {
+                playSound('bark');
+            }, 200);
+
             mascotDialog.innerText = "汪汪！(想要骨头)";
+            
+            const dogDiv = document.getElementById('mascot-dog');
+            dogDiv.classList.remove('mascot-shake');
+            void dogDiv.offsetWidth; 
+            dogDiv.classList.add('mascot-shake');
         }
 
         function goHome() {
