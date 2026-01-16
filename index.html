@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日语刷题 - 柴犬寿司店 (纯净版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            background-color: #FFF3E0;
+            background-image: 
+                radial-gradient(#FFCC80 15%, transparent 16%), 
+                radial-gradient(#FFCC80 15%, transparent 16%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            user-select: none;
+            padding-bottom: 50px;
+        }
+
+        /* 按钮点击反馈优化 */
+        .btn-cartoon {
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            top: 0;
+            cursor: pointer;
+        }
+        .btn-cartoon:active {
+            top: 4px;
+            box-shadow: 0 0px 0 0 !important;
+            transform: scale(0.98);
+        }
+
+        /* 主题色定义 */
+        .theme-n1 { --bg: #FF5252; --shadow: #D32F2F; }
+        .theme-n2 { --bg: #7C4DFF; --shadow: #512DA8; }
+        .theme-n3 { --bg: #00E676; --shadow: #00C853; }
+        .theme-n4 { --bg: #FFAB40; --shadow: #FF6D00; }
+        .theme-n5 { --bg: #2979FF; --shadow: #1565C0; }
+
+        .level-card { background-color: var(--bg); box-shadow: 0 6px 0 var(--shadow); }
+        
+        /* 动画 */
+        .mascot-float { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        
+        /* 点击小狗时的抖动动画 */
+        .mascot-shake { animation: shake 0.3s ease-in-out; }
+        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(10deg); } 50% { transform: rotate(0deg); } 75% { transform: rotate(-10deg); } 100% { transform: rotate(0deg); } }
+
+        .hidden-screen { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .opt-correct { background-color: #C8E6C9 !important; border-color: #4CAF50 !important; color: #1B5E20 !important; }
+        .opt-wrong { background-color: #FFCDD2 !important; border-color: #F44336 !important; color: #B71C1C !important; }
+
+        .wood-texture {
+            background-color: #D7CCC8;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #EFEBE9 10px, #EFEBE9 20px);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen py-6 px-4 text-gray-800">
+
+    <!-- 弹窗 -->
+    <div id="resume-modal" class="fixed inset-0 bg-black/50 z-50 hidden-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl border-4 border-blue-400 fade-in">
+            <div class="text-5xl mb-4">💾</div>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">发现存档</h3>
+            <p class="text-gray-500 text-sm mb-6">上次 <span id="resume-level-name" class="font-bold text-blue-500">N5</span> 没做完，继续吗？</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="playSound('click'); confirmResume(false)" class="bg-gray-200 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-300">重开</button>
+                <button onclick="playSound('click'); confirmResume(true)" class="bg-blue-500 text-white font-bold py-3 rounded-xl shadow-[0_4px_0_#1565C0] hover:translate-y-1 active:shadow-none transition-all">继续</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 吉祥物 -->
+    <div class="mascot-float mb-2 text-center z-10 w-full max-w-md pointer-events-none">
+        <div class="flex items-end justify-center">
+            <div id="mascot-dog" class="text-7xl filter drop-shadow-xl cursor-pointer relative -mr-4 z-10 pointer-events-auto transition hover:scale-110 active:scale-90" onclick="pokeMascot()">
+                🐕
+            </div>
+            <div class="bg-white px-5 py-3 rounded-2xl rounded-bl-none border-4 border-orange-400 font-bold text-orange-800 shadow-lg relative max-w-[280px] text-sm pointer-events-auto">
+                <span id="mascot-dialog">欢迎光临！今天想吃点什么？🍣</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. 首页 -->
+    <div id="screen-home" class="w-full max-w-md fade-in mt-6 relative z-20">
+        <div class="bg-white p-6 rounded-3xl shadow-xl border-4 border-orange-100 mb-6 text-center">
+            <h1 class="text-3xl font-extrabold text-gray-700 mb-2">日语寿司店</h1>
+            <p class="text-gray-400 text-sm">点一份寿司，学一句日语！</p>
+        </div>
+        
+        <div class="space-y-3">
+            <button onclick="playSound('click'); checkProgress('N5')" class="w-full btn-cartoon theme-n5 level-card text-white text-xl font-bold py-4 rounded-3xl flex items-center justify-between px-6">
+                <div class="flex items-center gap-3"><span class="text-3xl">🍵</span> <span>N5 入门</span></div>
+                <span class="text-xs bg-white/20 px-2 py-1 rounded-lg">10题</span>
+            </button>
+            <button onclick="playSound('click'); checkProgress('N4')" class="w-full btn-cartoon theme-n4 level-card text-white text-xl font-bold py-4 rounded-3xl flex items-center justify-between px-6">
+                <div class="flex items-center gap-3"><span class="text-3xl">🍙</span> <span>N4 基础</span></div>
+                <span class="text-xs bg-white/20 px-2 py-1 rounded-lg">10题</span>
+            </button>
+            <button onclick="playSound('click'); checkProgress('N3')" class="w-full btn-cartoon theme-n3 level-card text-white text-xl font-bold py-4 rounded-3xl flex items-center justify-between px-6">
+                <div class="flex items-center gap-3"><span class="text-3xl">🍡</span> <span>N3 中级</span></div>
+                <span class="text-xs bg-white/20 px-2 py-1 rounded-lg">10题</span>
+            </button>
+            <button onclick="playSound('click'); checkProgress('N2')" class="w-full btn-cartoon theme-n2 level-card text-white text-xl font-bold py-4 rounded-3xl flex items-center justify-between px-6">
+                <div class="flex items-center gap-3"><span class="text-3xl">🍤</span> <span>N2 上级</span></div>
+                <span class="text-xs bg-white/20 px-2 py-1 rounded-lg">10题</span>
+            </button>
+            <button onclick="playSound('click'); checkProgress('N1')" class="w-full btn-cartoon theme-n1 level-card text-white text-xl font-bold py-4 rounded-3xl flex items-center justify-between px-6">
+                <div class="flex items-center gap-3"><span class="text-3xl">🍣</span> <span>N1 大师</span></div>
+                <span class="text-xs bg-white/20 px-2 py-1 rounded-lg">10题</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. 答题页 -->
+    <div id="screen-quiz" class="hidden-screen w-full max-w-md fade-in pb-10 relative mt-6">
+        <button onclick="playSound('click'); saveAndExit()" class="absolute -top-14 right-2 z-40 bg-white text-red-500 px-4 py-2 rounded-full text-sm font-bold border-2 border-red-200 shadow-lg hover:bg-red-50 flex items-center gap-1 active:scale-95 transition-transform">
+            <span>💾</span> 保存退出
+        </button>
+
+        <!-- 寿司槽 -->
+        <div class="wood-texture w-full h-16 rounded-xl mb-4 border-b-4 border-yellow-700 flex items-center justify-between px-3 relative z-0">
+            <div id="sushi-bar-slots" class="flex justify-between w-full"></div>
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-700 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">收集进度</div>
+        </div>
+
+        <div class="bg-white border-4 border-gray-200 rounded-3xl p-6 shadow-xl mb-4 relative z-0">
+            <div class="flex justify-between items-center mb-2">
+                <div class="text-gray-400 text-xs font-bold bg-gray-100 px-2 py-1 rounded">Q. <span id="q-number">1</span>/10</div>
+                <div id="level-badge" class="font-bold text-blue-500">N5</div>
+            </div>
+            <p id="question-text" class="text-2xl font-extrabold text-center py-2 mb-2 break-words text-gray-800">题目加载中...</p>
+            <p id="question-sub" class="text-center text-gray-500 mb-2 text-sm">(提示信息)</p>
+        </div>
+
+        <div id="options-container" class="grid grid-cols-1 gap-3 mb-6"></div>
+
+        <div id="explanation-area" class="hidden-screen bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 mb-6 relative">
+            <div class="absolute -top-3 left-4 bg-orange-200 text-orange-800 text-xs font-bold px-2 py-1 rounded">解析MEMO</div>
+            <p id="explanation-text" class="text-sm text-gray-700 leading-relaxed mt-2"></p>
+        </div>
+
+        <button id="next-btn" onclick="playSound('click'); nextQuestion()" class="hidden-screen w-full btn-cartoon bg-gray-800 text-white shadow-[0_6px_0_#000] text-xl font-bold py-3 rounded-2xl">
+            下一题 ➡
+        </button>
+    </div>
+
+    <!-- 3. 结算页 -->
+    <div id="screen-result" class="hidden-screen w-full max-w-md fade-in text-center pb-10 mt-6">
+        <h2 class="text-2xl font-extrabold text-gray-700 mb-2">本次收获</h2>
+        
+        <div class="bg-red-900 p-2 rounded-[2rem] shadow-2xl mb-6 mx-auto max-w-sm relative">
+            <div class="border-2 border-yellow-600 rounded-[1.8rem] p-1 h-full bg-red-800">
+                <div id="bento-box" class="bg-black/90 rounded-[1.5rem] p-4 grid grid-cols-2 gap-2 min-h-[300px]"></div>
+            </div>
+        </div>
+
+        <div class="flex justify-center items-center gap-4 mb-6">
+            <div class="text-right">
+                <div class="text-xs text-gray-400">正确率</div>
+                <div id="final-score" class="text-3xl font-black text-gray-800">0%</div>
+            </div>
+            <div class="h-10 w-1 bg-gray-200"></div>
+            <div class="text-left">
+                <div class="text-xs text-gray-400">获得称号</div>
+                <div id="result-title" class="text-xl font-bold text-orange-600">-</div>
+            </div>
+        </div>
+        
+        <button onclick="playSound('click'); checkProgress(currentLevel, true)" class="w-full btn-cartoon bg-orange-500 text-white shadow-[0_6px_0_#E65100] text-xl font-bold py-3 rounded-2xl mb-3">再来一盘</button>
+        <button onclick="playSound('click'); goHome()" class="w-full btn-cartoon bg-white text-gray-600 border-2 border-gray-200 shadow-[0_4px_0_#E0E0E0] text-lg font-bold py-3 rounded-2xl">返回大厅</button>
+    </div>
+
+    <script>
+        // ----------------- 🔊 音效系统 -----------------
+        const SFX = {
+            click: new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_736f990921.mp3?filename=bubble-pop-28367.mp3"),
+            correct: new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_12b0c7443c.mp3?filename=success-1-6297.mp3"),
+            wrong: new Audio("https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=wrong-answer-129254.mp3"),
+            win: new Audio("https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c153e1.mp3?filename=success-fanfare-trumpets-6185.mp3"),
+            bark: new Audio("dog.mp3") 
+        };
+
+        // 统一播放函数
+        function playSound(type) {
+            const sound = SFX[type];
+            if(sound) {
+                sound.currentTime = 0;
+                sound.volume = 0.6;
+                sound.play().catch(e => console.log('Wait for interaction'));
+            }
+        }
+
+        // ----------------- 游戏数据 -----------------
+        const SUSHI_REWARDS = [
+            { icon: '🍵', name: '热茶' }, { icon: '🍙', name: '饭团' },
+            { icon: '🍥', name: '鱼板' }, { icon: '🥟', name: '煎饺' },
+            { icon: '🍤', name: '天妇罗' }, { icon: '🍢', name: '关东煮' },
+            { icon: '🍣', name: '三文鱼' }, { icon: '🍱', name: '豪华便当' },
+            { icon: '🍰', name: '甜点' }, { icon: '🏆', name: '极上拼盘' }
+        ];
+
+        const fullQuestionDB = {
+            'N5': [
+                { q: '猫', sub: '读音是？', options: ['いぬ', 'ねこ', 'とり', 'うま'], ans: 1, explain: '猫 (ねこ)' },
+                { q: '食べる', sub: '意思是？', options: ['喝', '看', '吃', '跑'], ans: 2, explain: '食べる (たべる) = 吃' },
+                { q: '川', sub: '意思是？', options: ['海', '川', '山', '田'], ans: 1, explain: '川 (かわ) = 河流' },
+                { q: '本', sub: '读音是？', options: ['はん', 'ほん', 'ばん', 'ぼん'], ans: 1, explain: '本 (ほん) = 书' },
+                { q: '学校', sub: '读音是？', options: ['がっこう', 'がこう', 'かっこう', 'かこう'], ans: 0, explain: '学校 (がっこう)' },
+                { q: '先生', sub: '意思是？', options: ['学生', '医生', '老师', '律师'], ans: 2, explain: '先生 (せんせい) = 老师' },
+                { q: '高い', sub: '读音是？', options: ['たかい', 'やすい', 'おもい', 'ひくい'], ans: 0, explain: '高い (たかい) = 高/贵' },
+                { q: '四つ', sub: '读音是？', options: ['よっつ', 'よつ', 'よんつ', 'しつ'], ans: 0, explain: '四つ (よっつ) = 4个' },
+                { q: '雨', sub: '意思是？', options: ['雪', '风', '云', '雨'], ans: 3, explain: '雨 (あめ) = 雨' },
+                { q: '元気', sub: '读音是？', options: ['てんき', 'げんき', 'びょうき', 'ゆうき'], ans: 1, explain: '元気 (げんき) = 精神/健康' }
+            ]
+        };
+
+        // ----------------- 游戏核心逻辑 -----------------
+        let currentLevel = '';
+        let quizQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let earnedSushiList = [];
+        const mascotDialog = document.getElementById('mascot-dialog');
+
+        function checkProgress(level, forceRestart = false) {
+            currentLevel = level;
+            const savedData = localStorage.getItem(`quiz_save_${level}`);
+            if (!forceRestart && savedData) {
+                document.getElementById('resume-level-name').innerText = level;
+                document.getElementById('resume-modal').classList.remove('hidden-screen');
+            } else {
+                startNewQuiz(level);
+            }
+        }
+
+        function confirmResume(shouldResume) {
+            document.getElementById('resume-modal').classList.add('hidden-screen');
+            shouldResume ? loadSavedQuiz(currentLevel) : startNewQuiz(currentLevel);
+        }
+
+        function saveProgress() {
+            if (currentIndex >= 10) return;
+            const state = { questions: quizQuestions, index: currentIndex, score: score, sushi: earnedSushiList, timestamp: new Date().getTime() };
+            localStorage.setItem(`quiz_save_${currentLevel}`, JSON.stringify(state));
+        }
+
+        function clearProgress(level) { localStorage.removeItem(`quiz_save_${level}`); }
+
+        function startNewQuiz(level) {
+            let pool = fullQuestionDB[level] || fullQuestionDB['N5'];
+            while(pool.length < 10) { pool = pool.concat(pool); }
+            quizQuestions = shuffleArray(pool).slice(0, 10);
+            currentIndex = 0; score = 0; earnedSushiList = new Array(10).fill(null);
+            clearProgress(level);
+            enterQuizScreen();
+        }
+
+        function loadSavedQuiz(level) {
+            const data = JSON.parse(localStorage.getItem(`quiz_save_${level}`));
+            if (!data) return startNewQuiz(level);
+            quizQuestions = data.questions; currentIndex = data.index; score = data.score; earnedSushiList = data.sushi;
+            mascotDialog.innerText = `欢迎回来！继续 ${level} 的挑战！`;
+            enterQuizScreen();
+        }
+
+        function enterQuizScreen() {
+            updateUITheme(currentLevel);
+            showScreen('screen-quiz');
+            renderSushiBar();
+            loadQuestion();
+        }
+
+        function saveAndExit() {
+            if (!currentLevel) { goHome(); return; }
+            saveProgress();
+            mascotDialog.innerText = "进度已保存！下次见！🐕";
+            setTimeout(goHome, 200);
+        }
+
+        function loadQuestion() {
+            document.getElementById('next-btn').classList.add('hidden-screen');
+            document.getElementById('explanation-area').classList.add('hidden-screen');
+            const qData = quizQuestions[currentIndex];
+            document.getElementById('q-number').innerText = currentIndex + 1;
+            document.getElementById('question-text').innerText = qData.q;
+            document.getElementById('question-sub').innerText = qData.sub;
+
+            const optionsDiv = document.getElementById('options-container');
+            optionsDiv.innerHTML = '';
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full bg-white border-b-4 border-gray-200 p-4 rounded-xl text-lg font-bold text-gray-600 hover:bg-gray-50 transition active:border-b-0 active:translate-y-1 mb-2`;
+                btn.innerText = opt;
+                btn.onclick = () => { playSound('click'); checkAnswer(idx, btn); };
+                optionsDiv.appendChild(btn);
+            });
+            saveProgress();
+        }
+
+        function checkAnswer(selectedIdx, btnElement) {
+            const qData = quizQuestions[currentIndex];
+            const correctIdx = qData.ans;
+            const allBtns = document.getElementById('options-container').querySelectorAll('button');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('cursor-default', 'opacity-80');
+                b.classList.remove('hover:bg-gray-50');
+            });
+
+            const reward = SUSHI_REWARDS[currentIndex];
+            if (selectedIdx === correctIdx) {
+                score++;
+                playSound('correct'); 
+                btnElement.classList.add('opt-correct', 'pop-in');
+                btnElement.classList.remove('opacity-80');
+                mascotDialog.innerText = `好棒！${reward.name} Get！😋`;
+                earnedSushiList[currentIndex] = reward;
+                updateSushiSlot(currentIndex, reward, true);
+            } else {
+                playSound('wrong'); 
+                btnElement.classList.add('opt-wrong');
+                btnElement.classList.remove('opacity-80');
+                allBtns[correctIdx].classList.add('opt-correct');
+                allBtns[correctIdx].classList.remove('opacity-80');
+                mascotDialog.innerText = "没关系！看解析！👀";
+                updateSushiSlot(currentIndex, null, false);
+            }
+
+            document.getElementById('explanation-text').innerText = qData.explain;
+            document.getElementById('explanation-area').classList.remove('hidden-screen');
+            document.getElementById('explanation-area').classList.add('fade-in');
+            
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.classList.remove('hidden-screen');
+            nextBtn.classList.add('fade-in');
+            nextBtn.innerText = (currentIndex === 9) ? "查看战利品 🍱" : "下一题 ➡";
+            saveProgress();
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < 10) {
+                loadQuestion();
+                mascotDialog.innerText = `第 ${currentIndex + 1} 道菜来啦！`;
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            playSound('win'); 
+            clearProgress(currentLevel);
+            showScreen('screen-result');
+            renderBentoBox();
+            const percentage = Math.round((score / 10) * 100);
+            document.getElementById('final-score').innerText = `${percentage}%`;
+            let title = score >= 8 ? "寿司之神" : (score >= 5 ? "寿司师傅" : "学徒");
+            document.getElementById('result-title').innerText = title;
+            mascotDialog.innerText = "多谢款待！🙏";
+        }
+
+        // ----------------- 通用辅助 -----------------
+        function renderSushiBar() {
+            const container = document.getElementById('sushi-bar-slots');
+            container.innerHTML = '';
+            for(let i=0; i<10; i++) {
+                const slot = document.createElement('div');
+                slot.id = `slot-${i}`;
+                slot.className = "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm bg-white/40 shadow-inner";
+                if (i < currentIndex) {
+                    const item = earnedSushiList[i];
+                    item ? (slot.innerHTML = item.icon, slot.classList.add('bg-white')) : (slot.innerHTML = "❌", slot.classList.add('text-red-500'));
+                } else {
+                    slot.innerText = "●"; slot.classList.add('text-gray-400');
+                }
+                container.appendChild(slot);
+            }
+        }
+
+        function updateSushiSlot(idx, reward, isCorrect) {
+            const slot = document.getElementById(`slot-${idx}`);
+            slot.classList.remove('text-gray-400');
+            if (isCorrect) {
+                slot.innerHTML = reward.icon; slot.classList.add('pop-in', 'bg-white');
+            } else {
+                slot.innerHTML = "❌"; slot.classList.add('pop-in', 'text-red-500');
+            }
+        }
+
+        function renderBentoBox() {
+            const box = document.getElementById('bento-box');
+            box.innerHTML = '';
+            earnedSushiList.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "flex flex-col items-center justify-center p-2 rounded-xl bg-gray-800 border border-gray-700 h-24";
+                item ? (div.innerHTML = `<div class="text-4xl pop-in">${item.icon}</div><div class="text-xs text-yellow-500 mt-1">${item.name}</div>`) 
+                     : (div.innerHTML = `<div class="text-3xl opacity-20 grayscale">🍽️</div>`);
+                box.appendChild(div);
+            });
+        }
+
+        function showScreen(screenId) {
+            ['screen-home', 'screen-quiz', 'screen-result'].forEach(id => document.getElementById(id).classList.add('hidden-screen'));
+            document.getElementById(screenId).classList.remove('hidden-screen');
+            document.getElementById(screenId).classList.add('fade-in');
+        }
+
+        function updateUITheme(level) {
+            const colors = {'N5': '#2979FF', 'N4': '#FFAB40', 'N3': '#00E676', 'N2': '#7C4DFF', 'N1': '#FF5252'};
+            const color = colors[level] || '#2979FF';
+            document.getElementById('level-badge').innerText = level;
+            document.getElementById('level-badge').style.color = color;
+        }
+
+        function shuffleArray(arr) {
+            let newArr = [...arr];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+        
+        // 点击小狗：播放两声短促的叫声，并添加抖动效果
+        function pokeMascot() {
+            playSound('bark');
+            setTimeout(() => {
+                playSound('bark');
+            }, 200);
+
+            mascotDialog.innerText = "汪汪！(想要骨头)";
+            
+            const dogDiv = document.getElementById('mascot-dog');
+            dogDiv.classList.remove('mascot-shake');
+            void dogDiv.offsetWidth; 
+            dogDiv.classList.add('mascot-shake');
+        }
+
+        function goHome() {
+            showScreen('screen-home');
+        }
+    </script>
+</body>
+</html>
