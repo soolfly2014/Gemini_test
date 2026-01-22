@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>白连夜 - 医学科普平台</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "comic-red": "#e63946",
+                        "comic-yellow": "#ffb703",
+                        "background-light": "#fdfcf9",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Noto Sans SC", "Space Grotesk", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .ligne-claire-border {
+                @apply border-2 border-[#0d131b];
+            }
+            .ligne-claire-border-thick {
+                @apply border-4 border-[#0d131b];
+            }
+            .comic-shadow {
+                box-shadow: 4px 4px 0px 0px #0d131b;
+            }
+            .comic-shadow-sm {
+                box-shadow: 2px 2px 0px 0px #0d131b;
+            }
+            .paper-grain {
+                background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDBbBsjTLW7DH4Ak-ZPIubZg0On3AoSAEib1SHHCdiKrZoty3OVyndkXC7iNBoMMHydN5RoBRmWsfU3mCOXnO5HLFa7fSwof_5MiQx965UfVpkzIy-TKVtMID0Frqu08_NCJ-VUrilegnPOwK14YWAkCYZTgghaxPhnZKsnUH-Lv8wKQx1qxVEYXjlRGT59WCHjPg1LGj3w92NNX8LQ-jwHpTkrD_gYpGkb-ZwCDYE2IatCdn-g4qEpYt9cD9SI4EkZNa_u1GwGs7o');
+                background-repeat: repeat;
+                background-size: 200px 200px;
+                background-blend-mode: multiply;
+            }
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.38.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#0d131b] dark:text-slate-50 transition-colors duration-300">
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
